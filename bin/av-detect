@@ -1,0 +1,97 @@
+#!/usr/bin/env python3
+"""Work out which external display is attached, and which sink feeds it.
+
+Connector names and HDMI sink numbering shift between docks, monitors and
+reboots, so nothing here is hardcoded:
+
+  * the display comes from niri's output list (anything not the laptop panel)
+  * the sink comes from ALSA's ELD data, which reports the monitor actually
+    plugged into each HDMI pin; pins map in order onto the HDMI PCM devices,
+    and a PCM device maps onto a PipeWire sink via its api.alsa.path.
+
+  av-detect output    connector name, e.g. HDMI-A-1
+  av-detect sink      PipeWire node id of that display's audio sink
+  av-detect all       both, as shell assignments
+"""
+
+import glob
+import json
+import os
+import re
+import subprocess
+import sys
+
+INTERNAL = ("eDP", "LVDS", "DSI")
+
+
+def focused_output():
+    raw = subprocess.run(["niri", "msg", "--json", "focused-output"],
+                         capture_output=True, text=True).stdout
+    try:
+        return (json.loads(raw) or {}).get("name", "")
+    except ValueError:
+        return ""
+
+
+def external_output():
+    """The screen to present on: external, and preferably not the one in use.
+
+    With a projector plus a desk monitor, the projector is whichever one you
+    are not working on. Falls back to the only external screen there is.
+    """
+    raw = subprocess.run(["niri", "msg", "--json", "outputs"],
+                         capture_output=True, text=True).stdout
+    outputs = json.loads(raw) if raw.strip() else {}
+
+    # A disabled output reports no logical geometry.
+    candidates = [name for name, info in outputs.items()
+                  if not name.startswith(INTERNAL) and info.get("logical")]
+    if not candidates:
+        return ""
+
+    focused = focused_output()
+    unused = [name for name in candidates if name != focused]
+    return sorted(unused)[0] if unused else sorted(candidates)[0]
+
+
+def connected_pin():
+    """ELD pin index whose monitor is actually present."""
+    for path in sorted(glob.glob("/proc/asound/card*/eld#*")):
+        try:
+            body = open(path).read()
+        except OSError:
+            continue
+        if re.search(r"eld_valid\s+1", body):
+            return int(path.rsplit(".", 1)[1]), os.path.dirname(path)
+    return None, None
+
+
+def sink_id():
+    pin, card_dir = connected_pin()
+    if pin is None:
+        return ""
+
+    # HDMI PCM devices, in order, line up with the ELD pins.
+    devices = sorted(int(re.search(r"pcm(\d+)p", p).group(1))
+                     for p in glob.glob(os.path.join(card_dir, "pcm*p")))
+    if pin >= len(devices):
+        return ""
+    alsa_path = f"hw:Generic,{devices[pin]}"
+
+    dump = json.loads(subprocess.run(["pw-dump"], capture_output=True, text=True).stdout)
+    for node in dump:
+        props = (node.get("info") or {}).get("props") or {}
+        if props.get("media.class") == "Audio/Sink" and props.get("api.alsa.path") == alsa_path:
+            return str(node["id"])
+    return ""
+
+
+if __name__ == "__main__":
+    what = sys.argv[1] if len(sys.argv) > 1 else "all"
+    if what == "output":
+        print(external_output())
+    elif what == "sink":
+        print(sink_id())
+    else:
+        print(f"EXTERNAL_OUTPUT={external_output()}")
+        print(f"EXTERNAL_SINK={sink_id()}")

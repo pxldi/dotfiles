@@ -1,0 +1,7 @@
+[Unit]
+Description=Cache the Teams calendar locally
+After=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/teams-calendar-sync --quiet

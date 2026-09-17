@@ -1,0 +1,11 @@
+[Unit]
+Description=Track MPRIS playback state for the bar
+After=graphical-session.target
+
+[Service]
+ExecStart=%h/.local/bin/mpris-follow
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

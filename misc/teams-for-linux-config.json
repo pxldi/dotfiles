@@ -1,0 +1,15 @@
+{
+  "disableNotificationSound": true,
+  "disableNotifications": true,
+  "graphApi": {
+    "enabled": true
+  },
+  "mqtt": {
+    "enabled": true,
+    "brokerUrl": "mqtt://localhost:1883",
+    "clientId": "teams-for-linux",
+    "topicPrefix": "teams",
+    "statusTopic": "status",
+    "commandTopic": "command"
+  }
+}

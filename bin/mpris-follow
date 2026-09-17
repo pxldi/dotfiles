@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Stream MPRIS playback state into a file the bar widget reads.
+#
+# playerctl --follow emits a line only when the state actually changes, so the
+# widget needs no polling and no process spawned per tick - it just reads a
+# file that is already correct.
+
+set -uo pipefail
+
+# The bar widget reads this through noctalia.pluginDataDir().
+STATE="${XDG_STATE_HOME:-$HOME/.local/state}/noctalia/plugins/data/sappler/media-controls/state"
+mkdir -p "$(dirname "$STATE")"
+
+write() {
+    printf '%s\n' "${1:-None}" > "$STATE.tmp" && mv "$STATE.tmp" "$STATE"
+}
+
+# --follow prints nothing until the first change, so seed the current value.
+write "$(playerctl status 2>/dev/null || echo None)"
+
+# An empty line means every player went away.
+playerctl --follow status 2>/dev/null | while IFS= read -r line; do
+    write "${line:-None}"
+done
+
+write "None"

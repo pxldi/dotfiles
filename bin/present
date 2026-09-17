@@ -1,0 +1,135 @@
+#!/usr/bin/env bash
+# Presentation presets for whatever external screen is attached.
+#
+#   present toggle   enter presentation mode, or leave it if already in it
+#   present on       enter (safe to run twice - it will not undo itself)
+#   present desk     send the whole current workspace over instead
+#   present mirror   duplicate the laptop screen (needs wl-mirror)
+#   present off      leave: window back, bar back, idle re-enabled
+#   present status   what is connected and whether a presentation is running
+#
+# niri's fullscreen action is a toggle and its IPC does not report fullscreen
+# state, so entering is recorded in a state file. Without that, pressing the
+# key twice would un-fullscreen instead of doing nothing.
+
+set -uo pipefail
+
+TV="${PRESENT_TV_OUTPUT:-$(av-detect output)}"
+LAPTOP="${PRESENT_LAPTOP_OUTPUT:-eDP-1}"
+STATE="${XDG_STATE_HOME:-$HOME/.local/state}/present.state"
+
+presenting() { [ -f "$STATE" ]; }
+
+window_alive() {
+    local id="$1"
+    [ -n "$id" ] && niri msg --json windows 2>/dev/null | grep -q "\"id\":$id,"
+}
+
+bar() { noctalia msg "bar-$1" default "$TV" >/dev/null 2>&1 || true; }
+caffeine() { noctalia msg "caffeine-$1" >/dev/null 2>&1 || true; }
+dnd() { noctalia msg "notification-dnd-set" "$1" >/dev/null 2>&1 || true; }
+rig() { command -v av >/dev/null && av "$1" | sed 's/^/  /'; }
+
+require_tv() {
+    if [ -z "$TV" ]; then
+        echo "no external display connected"
+        exit 1
+    fi
+    # With the lid shut the external screen is the only screen, so presenting
+    # on it just fullscreens the one you are working on. Allowed, but say so.
+    if [ "$TV" = "$(niri msg --json focused-output 2>/dev/null | grep -oP '"name":\s*"\K[^"]+' | head -1)" ]; then
+        echo "note: $TV is your only screen, so this presents on the screen you are using"
+    fi
+}
+
+enter() {
+    require_tv
+    if presenting; then
+        echo "already presenting on $TV ('present off' to stop)"
+        exit 0
+    fi
+
+    local id
+    id=$(niri msg --json focused-window 2>/dev/null | grep -oE '"id":[0-9]+' | head -1 | cut -d: -f2)
+
+    niri msg action move-window-to-monitor "$TV"
+    niri msg action focus-monitor "$TV"
+    niri msg action fullscreen-window
+    bar hide
+    caffeine enable
+    dnd on
+    rig room
+
+    mkdir -p "$(dirname "$STATE")"
+    printf 'window=%s\noutput=%s\nmode=%s\n' "$id" "$TV" "${1:-window}" > "$STATE"
+    echo "presenting on $TV"
+}
+
+leave() {
+    local id="" mode="window"
+    if presenting; then
+        id=$(grep -oP '^window=\K.*' "$STATE" 2>/dev/null)
+        mode=$(grep -oP '^mode=\K.*' "$STATE" 2>/dev/null || echo window)
+    fi
+
+    pkill -x wl-mirror 2>/dev/null
+
+    if [ "$mode" != "mirror" ] && window_alive "$id"; then
+        # Only undo the fullscreen we applied, and only on the window we moved.
+        niri msg action focus-window --id "$id" 2>/dev/null
+        niri msg action fullscreen-window 2>/dev/null
+        niri msg action move-window-to-monitor "$LAPTOP" 2>/dev/null
+    fi
+
+    niri msg action focus-monitor "$LAPTOP" 2>/dev/null
+    bar show
+    caffeine disable
+    dnd off
+    rig laptop
+    rm -f "$STATE"
+    echo "back to $LAPTOP"
+}
+
+case "${1:-toggle}" in
+toggle)  presenting && leave || enter window ;;
+on)      enter window ;;
+desk)
+    require_tv
+    presenting && { echo "already presenting"; exit 0; }
+    niri msg action move-workspace-to-monitor "$TV"
+    niri msg action focus-monitor "$TV"
+    bar hide
+    caffeine enable
+    dnd on
+    rig room
+    mkdir -p "$(dirname "$STATE")"
+    printf 'window=\noutput=%s\nmode=desk\n' "$TV" > "$STATE"
+    echo "workspace moved to $TV"
+    ;;
+mirror)
+    require_tv
+    command -v wl-mirror >/dev/null || { echo "wl-mirror is not installed"; exit 1; }
+    pkill -x wl-mirror 2>/dev/null
+    wl-mirror -F -S "$LAPTOP" >/dev/null 2>&1 &
+    sleep 1
+    niri msg action move-window-to-monitor "$TV" 2>/dev/null
+    niri msg action fullscreen-window 2>/dev/null
+    bar hide
+    caffeine enable
+    dnd on
+    rig room
+    mkdir -p "$(dirname "$STATE")"
+    printf 'window=\noutput=%s\nmode=mirror\n' "$TV" > "$STATE"
+    echo "mirroring $LAPTOP onto $TV"
+    ;;
+off)     leave ;;
+status)
+    niri msg outputs | grep -E "^Output|Logical (position|size)|Scale"
+    presenting && echo "presenting: yes ($(tr '\n' ' ' < "$STATE"))" || echo "presenting: no"
+    pgrep -x wl-mirror >/dev/null && echo "mirroring: active" || echo "mirroring: off"
+    ;;
+*)
+    sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'
+    exit 1
+    ;;
+esac

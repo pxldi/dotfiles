@@ -1,0 +1,117 @@
+#!/usr/bin/env python3
+"""Next calendar event, for the Noctalia bar (and for joining meetings).
+
+Reads the cache that `teams-calendar-sync` pulls out of the Teams client.
+
+  next-event            JSON for a bar widget (text/icon/tooltip)
+  next-event --raw      JSON array of the next few events, for the Noctalia plugin
+  next-event --join     open the next meeting's join URL
+  next-event --list     plain listing of the upcoming events (debugging)
+"""
+
+import json
+import os
+import subprocess
+import sys
+import time
+
+CACHE = os.path.expanduser("~/.local/share/teams-calendar/events.json")
+# Past this, the cache is old enough that it should be called out rather than shown.
+STALE_SECS = 30 * 60
+IMMINENT_SECS = 5 * 60
+
+
+def load():
+    if not os.path.exists(CACHE):
+        raise SystemExit(f"no cache at {CACHE}; run teams-calendar-sync")
+    with open(CACHE) as handle:
+        payload = json.load(handle)
+
+    now = int(time.time())
+    events = [e for e in payload.get("events", [])
+              if (e.get("end") or e["start"]) > now and not e.get("all_day")]
+    events.sort(key=lambda e: e["start"])
+    return payload.get("fetched", 0), events
+
+
+def human_delta(secs):
+    if secs < 60:
+        return "now"
+    mins = int(secs // 60)
+    if mins < 60:
+        return f"{mins}m"
+    hours, mins = divmod(mins, 60)
+    if hours < 24:
+        return f"{hours}h{mins:02d}m" if mins else f"{hours}h"
+    return f"{hours // 24}d"
+
+
+def emit_json(events, fetched, now):
+    if not events:
+        print(json.dumps({"text": "", "icon": "calendar-check", "tooltip": "No upcoming events"}))
+        return
+
+    ev = events[0]
+    running = ev["start"] <= now
+    until = ev["start"] - now
+    label = "now" if running else human_delta(until)
+    title = ev["summary"]
+    if len(title) > 32:
+        title = title[:31] + "…"
+
+    out = {"text": f"{label} · {title}", "icon": "video" if ev.get("url") else "calendar-event"}
+    if running or until <= IMMINENT_SECS:
+        out["textColor"] = "error"
+        out["iconColor"] = "error"
+
+    lines = [f"<b>{ev['summary']}</b>", time.strftime("%H:%M", time.localtime(ev["start"]))]
+    if ev.get("location"):
+        lines.append(ev["location"])
+    if ev.get("url"):
+        lines.append("Click to join")
+    if now - fetched > STALE_SECS:
+        lines.append(f"Cache {human_delta(now - fetched)} old")
+    for nxt in events[1:4]:
+        lines.append(f"{time.strftime('%a %H:%M', time.localtime(nxt['start']))}  {nxt['summary']}")
+    out["tooltip"] = "\n".join(lines)
+    print(json.dumps(out))
+
+
+def main():
+    arg = sys.argv[1] if len(sys.argv) > 1 else "--json"
+    fetched, events = load()
+    now = int(time.time())
+
+    if arg == "--raw":
+        print(json.dumps({"now": now, "fetched": fetched, "events": events[:5]}))
+        return
+
+    if arg == "--list":
+        age = human_delta(now - fetched)
+        print(f"cache fetched {age} ago\n")
+        for ev in events:
+            when = time.strftime("%a %d %b %H:%M", time.localtime(ev["start"]))
+            join = "  " + ev["url"] if ev.get("url") else ""
+            print(f"{when}  {ev['summary']}{join}")
+        return
+
+    if arg == "--join":
+        for ev in events[:3]:
+            if ev.get("url"):
+                # Detached: whatever spawned us may be killed on a timeout.
+                subprocess.Popen(["xdg-open", ev["url"]], start_new_session=True)
+                return
+        return
+
+    emit_json(events, fetched, now)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as exc:
+        # The bar must never show a traceback; other modes report honestly.
+        if len(sys.argv) > 1 and sys.argv[1] != "--json":
+            print(f"next-event: {exc}", file=sys.stderr)
+            sys.exit(1)
+        print(json.dumps({"text": "", "icon": "calendar-off", "tooltip": f"next-event: {exc}"}))

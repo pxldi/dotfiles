@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Print the Teams unread count, from the tray item's tooltip.
+#
+# teams-for-linux publishes nothing useful over MQTT for this, and its tray
+# icon is unreliable - it shows the attention dot with nothing waiting. The
+# tooltip text ("Microsoft Teams (3)") carries the real number, so read that.
+#
+# The bus name changes every time Teams restarts, hence the lookup.
+
+set -uo pipefail
+
+items=$(busctl --user get-property org.kde.StatusNotifierWatcher /StatusNotifierWatcher \
+    org.kde.StatusNotifierWatcher RegisteredStatusNotifierItems 2>/dev/null)
+
+for entry in $items; do
+    entry=${entry//\"/}
+    case "$entry" in
+    *[:/]*) ;;
+    *) continue ;;
+    esac
+    bus=${entry%%/*}
+    path=/${entry#*/}
+    [ "$bus" = "$entry" ] && continue
+
+    id=$(busctl --user get-property "$bus" "$path" org.kde.StatusNotifierItem Id 2>/dev/null)
+    case "$id" in
+    *teams-for-linux*) ;;
+    *) continue ;;
+    esac
+
+    tip=$(busctl --user get-property "$bus" "$path" org.kde.StatusNotifierItem ToolTip 2>/dev/null)
+    # Tooltip renders as: (sa(iiay)ss) "" 0 "Microsoft Teams (3)" ""
+    count=$(printf '%s' "$tip" | grep -oE '\([0-9]+\)' | head -1 | tr -d '()')
+    printf '%s\n' "${count:-0}"
+    exit 0
+done
+
+# No Teams tray item: Teams is not running.
+echo "-1"

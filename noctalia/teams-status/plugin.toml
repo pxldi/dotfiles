@@ -1,0 +1,36 @@
+id = "sappler/teams-status"
+name = "Teams Status"
+version = "1.0.0"
+plugin_api = 9
+author = "sappler"
+license = "MIT"
+icon = "brand-teams"
+description = "Teams unread count in the bar, read from the tray item's tooltip rather than its unreliable icon."
+dependencies = ["teams-unread", "teams-focus"]
+tags = ["bar", "teams"]
+
+[[widget]]
+id = "teams"
+entry = "widget.luau"
+
+  [[widget.setting]]
+  key = "poll_seconds"
+  type = "int"
+  label_key = "settings.poll_seconds.label"
+  description_key = "settings.poll_seconds.description"
+  default = 5
+  min = 2
+
+  [[widget.setting]]
+  key = "hide_when_empty"
+  type = "bool"
+  label_key = "settings.hide_when_empty.label"
+  description_key = "settings.hide_when_empty.description"
+  default = false
+
+  [[widget.setting]]
+  key = "show_count"
+  type = "bool"
+  label_key = "settings.show_count.label"
+  description_key = "settings.show_count.description"
+  default = true

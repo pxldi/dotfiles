@@ -1,0 +1,12 @@
+[Unit]
+Description=Serve the cached Teams calendar to evolution-data-server
+After=graphical-session.target
+
+[Service]
+# Bound to loopback: this is only for GNOME Calendar on this machine.
+ExecStart=/usr/bin/python3 -m http.server 8099 --bind 127.0.0.1 --directory %h/.local/share/teams-calendar
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target

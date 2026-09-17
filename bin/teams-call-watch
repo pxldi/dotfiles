@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# While a Teams call is running: silence notifications and keep the screen on.
+#
+# teams-for-linux publishes call state on MQTT, the same broker the calendar
+# sync already uses, so this costs nothing extra to run.
+#
+# Anything this turns on, it turns back off - and only if it was the one that
+# turned it on. Someone who had Do Not Disturb set before the call still has it
+# afterwards.
+
+set -uo pipefail
+
+BROKER=(-h localhost -p 1883)
+TOPIC="teams/in-call"
+
+dnd_was_on=false
+we_set_dnd=false
+we_set_caffeine=false
+
+on_call_start() {
+    [ "$(noctalia msg notification-dnd-status 2>/dev/null)" = "on" ] && dnd_was_on=true || dnd_was_on=false
+    if [ "$dnd_was_on" = false ]; then
+        noctalia msg notification-dnd-set on >/dev/null 2>&1 && we_set_dnd=true
+    fi
+    noctalia msg caffeine-enable >/dev/null 2>&1 && we_set_caffeine=true
+    noctalia msg notification-show "In a call" "Notifications silenced until it ends" >/dev/null 2>&1
+}
+
+on_call_end() {
+    if [ "$we_set_dnd" = true ]; then
+        noctalia msg notification-dnd-set off >/dev/null 2>&1
+        we_set_dnd=false
+    fi
+    if [ "$we_set_caffeine" = true ]; then
+        noctalia msg caffeine-disable >/dev/null 2>&1
+        we_set_caffeine=false
+    fi
+}
+
+# -W is deliberately absent: this subscription is meant to live forever.
+mosquitto_sub "${BROKER[@]}" -t "$TOPIC" | while read -r state; do
+    case "$state" in
+    true)  on_call_start ;;
+    false) on_call_end ;;
+    esac
+done

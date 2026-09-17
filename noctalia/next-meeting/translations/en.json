@@ -1,0 +1,68 @@
+{
+  "settings": {
+    "refresh_seconds": {
+      "label": "Refresh interval",
+      "description": "Seconds between calendar lookups. The countdown itself ticks every second."
+    },
+    "max_title_length": {
+      "label": "Max title length",
+      "description": "Event titles longer than this are truncated in the bar."
+    },
+    "imminent_minutes": {
+      "label": "Imminent threshold",
+      "description": "Minutes before the start at which the widget turns urgent."
+    },
+    "hide_when_empty": {
+      "label": "Hide when nothing is scheduled",
+      "description": "Remove the widget from the bar when there is no upcoming event."
+    },
+    "notify_at_start": {
+      "label": "Notify about meetings",
+      "description": "Send one notification per meeting, shortly before it starts."
+    },
+    "calendar_app": {
+      "label": "Calendar app",
+      "description": "Command used to open the calendar when there is no meeting to join."
+    },
+    "join_window_minutes": {
+      "label": "Join window",
+      "description": "Clicking the widget joins the meeting when it starts within this many minutes; otherwise it opens the agenda."
+    },
+    "panel_font_size": {
+      "label": "Agenda text size",
+      "description": "Base font size in the agenda panel. Titles and day headers scale with it."
+    },
+    "notify_minutes_before": {
+      "label": "Notify before a meeting",
+      "description": "Minutes of warning before a meeting starts. 0 notifies as it begins."
+    }
+  },
+  "none": "No upcoming events",
+  "now": "now",
+  "tooltip": {
+    "event": "Event",
+    "when": "When",
+    "calendar": "Calendar",
+    "location": "Location",
+    "join": "Join",
+    "next": "Then",
+    "hint": "Left click: join / open calendar · Right click: refresh"
+  },
+  "join_hint": "Click to join",
+  "error": "next-event failed",
+  "agenda": {
+    "title": "Agenda",
+    "empty": "Nothing scheduled",
+    "join": "Join",
+    "refresh": "Refresh",
+    "open_calendar": "Open calendar",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "stale": "Teams is not running; showing cached data"
+  },
+  "notify": {
+    "soon": "in %{minutes} min",
+    "now": "starting now",
+    "join": "click the widget to join"
+  }
+}

@@ -1,0 +1,36 @@
+[Data Source]
+DisplayName=Teams
+Enabled=true
+Parent=webcal-stub
+
+[Calendar]
+BackendName=webcal
+Color=#62a0ea
+Selected=true
+Order=0
+
+[Refresh]
+Enabled=true
+IntervalMinutes=30
+EnabledOnMeteredNetwork=true
+
+[Authentication]
+Host=127.0.0.1
+Port=8099
+User=
+Method=none
+RememberPassword=false
+ProxyUid=system-proxy
+CredentialName=
+IsExternal=false
+
+[WebDAV Backend]
+ResourcePath=/teams.ics
+AvoidIfmatch=false
+CalendarAutoSchedule=false
+
+[Security]
+Method=none
+
+[Offline]
+StaySynchronized=true

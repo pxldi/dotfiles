@@ -1,0 +1,29 @@
+id = "sappler/media-controls"
+name = "Media Controls"
+version = "1.0.0"
+plugin_api = 9
+author = "sappler"
+license = "MIT"
+icon = "player-play"
+description = "Previous, play/pause and next directly in the bar, with the glyph following the real playback state."
+dependencies = ["playerctl"]
+tags = ["bar", "media"]
+
+[[widget]]
+id = "play_pause"
+entry = "playpause.luau"
+
+  [[widget.setting]]
+  key = "hide_when_idle"
+  type = "bool"
+  label_key = "settings.hide_when_idle.label"
+  description_key = "settings.hide_when_idle.description"
+  default = true
+
+[[widget]]
+id = "previous"
+entry = "previous.luau"
+
+[[widget]]
+id = "next"
+entry = "next.luau"

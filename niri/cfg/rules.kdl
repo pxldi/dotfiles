@@ -1,0 +1,101 @@
+    window-rule {
+        geometry-corner-radius 20 // Set every window radius to 20
+        clip-to-geometry true
+    }
+
+    // Window blur removed — it stutters at 3440x1440 on this iGPU. Transparency is unaffected.
+
+    // Floating Noctalia settings window.
+    window-rule {
+        match app-id="dev.noctalia.Noctalia"
+        open-floating true
+        default-column-width { fixed 1080; }
+        default-window-height { fixed 920; }
+    }
+
+    // A glance-at window, not something to give a whole column to.
+    window-rule {
+        match app-id=r#"^org\.gnome\.Calendar$"#
+        open-floating true
+        default-column-width { fixed 1280; }
+        default-window-height { fixed 860; }
+    }
+
+    // if you use steam you will probably like these
+    window-rule {
+        match app-id="steam"
+        exclude title=r#"^[Ss]team$"#
+        open-floating true
+    }
+
+    window-rule {
+       match app-id="steam" title=r#"^notificationtoasts_\d+_desktop$"#
+       default-floating-position x=10 y=10 relative-to="bottom-right"
+       open-focused false
+    }
+
+    layer-rule {
+        match namespace="^noctalia-wallpaper"
+        place-within-backdrop true
+    }
+
+    layer-rule {
+        match namespace="^noctalia-(bar-[^\"]+|notification|dock|panel|attached-panel|osd)$"
+        background-effect {
+          xray false
+          // blur false
+        }
+    }
+
+// ────────────── Startup placement ──────────────
+// Ghostty windows are told apart by a per-slot --class (see startup.fish).
+
+    window-rule {
+        match app-id=r#"^com\.mitchellh\.ghostty\.w1"#
+        open-on-workspace "1"
+        default-column-width { proportion 0.33333; }
+    }
+
+    window-rule {
+        match app-id=r#"^com\.mitchellh\.ghostty\.w2"#
+        open-on-workspace "2"
+        default-column-width { proportion 0.5; }
+    }
+
+    window-rule {
+        match app-id=r#"^org\.gnome\.Nautilus$"#
+        open-on-workspace "2"
+        default-column-width { proportion 0.5; }
+    }
+
+    // Autostarted in place of the file manager: the password prompt is the
+    // reminder to unlock work.vc. Nautilus is opened by hand afterwards, so its
+    // ~/work/projects bookmark resolves instead of being cached as broken.
+    // VeraCrypt opens floating by default, hence the explicit tiling.
+    window-rule {
+        match app-id="^veracrypt$"
+        open-on-workspace "2"
+        open-floating false
+        default-column-width { proportion 0.5; }
+    }
+
+    window-rule {
+        match app-id="^helium$"
+        open-on-workspace "1"
+        default-column-width { proportion 0.66667; }
+    }
+
+    window-rule {
+        match app-id="^teams-for-linux$"
+        open-on-workspace "3"
+    }
+
+    window-rule {
+        match app-id="^feishin$"
+        open-on-workspace "3"
+    }
+
+    window-rule {
+        match app-id=r#"^com\.rafaelmardojai\.Blanket$"#
+        open-on-workspace "3"
+    }

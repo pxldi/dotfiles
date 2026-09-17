@@ -1,0 +1,13 @@
+{
+  "settings": {
+    "hide_when_idle": {
+      "label": "Hide when nothing is playing",
+      "description": "Remove the controls from the bar when no media player is running."
+    }
+  },
+  "playing": "Playing - click to pause",
+  "paused": "Paused - click to play",
+  "idle": "Nothing playing",
+  "previous": "Previous track",
+  "next": "Next track"
+}

@@ -1,0 +1,88 @@
+id = "sappler/next-meeting"
+name = "Next Meeting"
+version = "1.0.0"
+plugin_api = 9
+author = "sappler"
+license = "MIT"
+icon = "calendar-event"
+description = "Shows the next calendar event (Microsoft 365 / Teams meetings included) in the bar, with click-to-join."
+dependencies = ["next-event"]
+tags = ["bar", "calendar", "productivity"]
+
+[[setting]]
+key = "calendar_app"
+type = "string"
+label_key = "settings.calendar_app.label"
+description_key = "settings.calendar_app.description"
+default = "gnome-calendar"
+
+[[setting]]
+key = "panel_font_size"
+type = "int"
+label_key = "settings.panel_font_size.label"
+description_key = "settings.panel_font_size.description"
+default = 13
+min = 9
+
+[[panel]]
+id = "agenda"
+entry = "panel.luau"
+
+[[widget]]
+id = "next_meeting"
+entry = "widget.luau"
+
+  [[widget.setting]]
+  key = "refresh_seconds"
+  type = "int"
+  label_key = "settings.refresh_seconds.label"
+  description_key = "settings.refresh_seconds.description"
+  default = 60
+  min = 15
+
+  [[widget.setting]]
+  key = "max_title_length"
+  type = "int"
+  label_key = "settings.max_title_length.label"
+  description_key = "settings.max_title_length.description"
+  default = 28
+  min = 6
+
+  [[widget.setting]]
+  key = "imminent_minutes"
+  type = "int"
+  label_key = "settings.imminent_minutes.label"
+  description_key = "settings.imminent_minutes.description"
+  default = 5
+  min = 0
+
+  [[widget.setting]]
+  key = "hide_when_empty"
+  type = "bool"
+  label_key = "settings.hide_when_empty.label"
+  description_key = "settings.hide_when_empty.description"
+  default = false
+
+  [[widget.setting]]
+  key = "notify_at_start"
+  type = "bool"
+  label_key = "settings.notify_at_start.label"
+  description_key = "settings.notify_at_start.description"
+  default = true
+
+  [[widget.setting]]
+  key = "notify_minutes_before"
+  type = "int"
+  label_key = "settings.notify_minutes_before.label"
+  description_key = "settings.notify_minutes_before.description"
+  default = 2
+  min = 0
+
+  [[widget.setting]]
+  key = "join_window_minutes"
+  type = "int"
+  label_key = "settings.join_window_minutes.label"
+  description_key = "settings.join_window_minutes.description"
+  default = 10
+  min = 0
+

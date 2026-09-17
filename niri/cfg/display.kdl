@@ -1,0 +1,24 @@
+// ────────────── Output Configuration ──────────────
+// You can run `niri msg outputs` to get the correct name for your displays.
+// You will have to remove "/-" and edit it before it takes effect.
+// https://github.com/YaLTeR/niri/wiki/Configuration:-Outputs
+
+/- output "DP-1" {
+    mode "2560x1440@359.979" // Set resolution and refresh rate
+    scale 1 // No scaling (use 2 for HiDPI)
+}
+// The Hisense TV. 4K at scale 1 renders the UI unreadably small from a
+// couch; scale 2 gives a logical 1920x1080 with 4K sharpness.
+output "DP-2" {
+    mode "3840x2160@60.000"
+    scale 2
+    position x=1536 y=0
+}
+
+// Laptop panel anchored at the origin, so connecting or disconnecting the
+// TV never moves it out from under the pointer and the open windows.
+output "eDP-1" {
+    mode "1920x1080@60.001"
+    scale 1.25
+    position x=0 y=0
+}

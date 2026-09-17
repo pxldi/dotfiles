@@ -1,0 +1,3 @@
+# Caches and generated state, never config
+*.bak
+*.tmp

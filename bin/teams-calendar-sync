@@ -1,0 +1,186 @@
+#!/usr/bin/env python3
+"""Pull the calendar out of the running Teams client and cache it locally.
+
+teams-for-linux (graphApi + MQTT enabled) answers a `get-calendar` command on
+`teams/command` by publishing raw Microsoft Graph JSON to `teams/calendar`.
+This asks the question, then writes two files:
+
+  events.json  the normalised events `next-event` reads
+  teams.ics    the same events as iCalendar, for GNOME Calendar to subscribe to
+
+Needs mosquitto_pub / mosquitto_sub and a broker on localhost.
+"""
+
+import json
+import os
+import re
+import subprocess
+import sys
+import time
+from datetime import datetime, timedelta, timezone
+
+BROKER = ["-h", "localhost", "-p", "1883"]
+COMMAND_TOPIC = "teams/command"
+RESPONSE_TOPIC = "teams/calendar"
+CACHE_DIR = os.path.expanduser("~/.local/share/teams-calendar")
+LOOKAHEAD_DAYS = 14
+LOOKBACK_HOURS = 4
+RESPONSE_TIMEOUT = 30
+
+MEETING_HOSTS = ("teams.microsoft.com", "teams.live.com", "zoom.us", "meet.google.com", "webex.com")
+URL_RE = re.compile(r"https?://[^\s<>\"']+")
+
+
+def ask_teams():
+    """Publish get-calendar, return the JSON that comes back on teams/calendar."""
+    now = datetime.now(timezone.utc)
+    command = json.dumps({
+        "action": "get-calendar",
+        "startDate": (now - timedelta(hours=LOOKBACK_HOURS)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "endDate": (now + timedelta(days=LOOKAHEAD_DAYS)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    })
+
+    # Subscribe first: the reply can land before a later-started subscriber sees it.
+    sub = subprocess.Popen(
+        ["mosquitto_sub", *BROKER, "-t", RESPONSE_TOPIC, "-C", "1", "-W", str(RESPONSE_TIMEOUT)],
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+    )
+    time.sleep(0.5)
+
+    pub = subprocess.run(
+        ["mosquitto_pub", *BROKER, "-t", COMMAND_TOPIC, "-m", command],
+        capture_output=True, text=True,
+    )
+    if pub.returncode != 0:
+        sub.kill()
+        raise SystemExit(f"publish failed: {pub.stderr.strip()} (is mosquitto running?)")
+
+    try:
+        out, err = sub.communicate(timeout=RESPONSE_TIMEOUT + 5)
+    except subprocess.TimeoutExpired:
+        sub.kill()
+        raise SystemExit("no reply on teams/calendar")
+    if not out.strip():
+        raise SystemExit(
+            "no reply on teams/calendar within "
+            f"{RESPONSE_TIMEOUT}s - is Teams running with graphApi enabled? {err.strip()}"
+        )
+    return json.loads(out)
+
+
+def graph_time(value):
+    """Graph sends {'dateTime': '...', 'timeZone': 'UTC'}; we want a unix stamp."""
+    if not value:
+        return None
+    raw = value.get("dateTime")
+    if not raw:
+        return None
+    raw = raw.split(".")[0]
+    stamp = datetime.strptime(raw, "%Y-%m-%dT%H:%M:%S")
+    tz = value.get("timeZone") or "UTC"
+    if tz.upper() in ("UTC", "GMT"):
+        stamp = stamp.replace(tzinfo=timezone.utc)
+    else:
+        stamp = stamp.replace(tzinfo=datetime.now().astimezone().tzinfo)
+    return int(stamp.timestamp())
+
+
+def join_url(item):
+    online = item.get("onlineMeeting") or {}
+    if online.get("joinUrl"):
+        return online["joinUrl"]
+    blobs = [
+        (item.get("location") or {}).get("displayName") or "",
+        (item.get("body") or {}).get("content") or "",
+        item.get("onlineMeetingUrl") or "",
+    ]
+    urls = [u.rstrip(">),.\"'") for blob in blobs for u in URL_RE.findall(blob)]
+    for url in urls:
+        if any(host in url for host in MEETING_HOSTS):
+            return url
+    return None
+
+
+def normalise(payload):
+    if not payload.get("success", True):
+        raise SystemExit(f"Teams reported failure: {payload.get('error', payload)}")
+    items = (payload.get("data") or {}).get("value") or []
+
+    events = []
+    for item in items:
+        if item.get("isCancelled"):
+            continue
+        start = graph_time(item.get("start"))
+        if start is None:
+            continue
+        events.append({
+            "start": start,
+            "end": graph_time(item.get("end")),
+            "summary": (item.get("subject") or "(no title)").strip(),
+            "location": ((item.get("location") or {}).get("displayName") or "").strip(),
+            "url": join_url(item),
+            "all_day": bool(item.get("isAllDay")),
+            "organizer": ((item.get("organizer") or {}).get("emailAddress") or {}).get("name", ""),
+            "calendar": "Teams",
+            "uid": item.get("id", ""),
+        })
+    events.sort(key=lambda e: e["start"])
+    return events
+
+
+def ics_escape(text):
+    return text.replace("\\", "\\\\").replace(";", r"\;").replace(",", r"\,").replace("\n", r"\n")
+
+
+def to_ics(events):
+    stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
+    lines = [
+        "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//teams-calendar-sync//EN",
+        "CALSCALE:GREGORIAN", "X-WR-CALNAME:Teams",
+    ]
+    for index, ev in enumerate(events):
+        uid = ev["uid"] or f"{ev['start']}-{index}"
+        lines += [
+            "BEGIN:VEVENT",
+            f"UID:{re.sub(r'[^A-Za-z0-9_-]', '', uid)[:120]}@teams-for-linux",
+            f"DTSTAMP:{stamp}",
+            f"DTSTART:{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime(ev['start']))}",
+            f"SUMMARY:{ics_escape(ev['summary'])}",
+        ]
+        if ev["end"]:
+            lines.append(f"DTEND:{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime(ev['end']))}")
+        if ev["location"]:
+            lines.append(f"LOCATION:{ics_escape(ev['location'])}")
+        if ev["url"]:
+            lines.append(f"DESCRIPTION:{ics_escape(ev['url'])}")
+            lines.append(f"URL:{ev['url']}")
+        lines.append("END:VEVENT")
+    lines.append("END:VCALENDAR")
+    return "\r\n".join(lines) + "\r\n"
+
+
+def write(path, content):
+    # Write-then-rename so a reader never sees a half-written file.
+    tmp = path + ".tmp"
+    with open(tmp, "w") as handle:
+        handle.write(content)
+    os.replace(tmp, path)
+
+
+def main():
+    os.makedirs(CACHE_DIR, exist_ok=True)
+    events = normalise(ask_teams())
+
+    write(os.path.join(CACHE_DIR, "events.json"),
+          json.dumps({"fetched": int(time.time()), "events": events}))
+    write(os.path.join(CACHE_DIR, "teams.ics"), to_ics(events))
+
+    if "--quiet" not in sys.argv:
+        print(f"{len(events)} events cached in {CACHE_DIR}")
+        for ev in events[:5]:
+            when = time.strftime("%a %d %b %H:%M", time.localtime(ev["start"]))
+            print(f"  {when}  {ev['summary']}{'  [join]' if ev['url'] else ''}")
+
+
+if __name__ == "__main__":
+    main()

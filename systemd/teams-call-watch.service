@@ -1,0 +1,11 @@
+[Unit]
+Description=Silence notifications and inhibit idle during Teams calls
+After=graphical-session.target
+
+[Service]
+ExecStart=%h/.local/bin/teams-call-watch
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=default.target

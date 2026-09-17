@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# Switch the audio/video rig between the laptop and the room setup.
+#
+#   av room      sound out to the TV, C920 webcam, C920 mic
+#   av laptop    built-in speakers, camera and mic
+#   av status    what is currently default
+#   av list      every sink/source/camera, with ids
+#
+# Devices are matched on PipeWire node names, which survive replugging;
+# anything not currently present is skipped rather than treated as an error.
+
+set -uo pipefail
+
+LAPTOP_SINK="alsa_output.pci-0000_07_00.6.HiFi__Speaker__sink"
+ROOM_MIC="alsa_input.usb-Generalplus_OSM09-00.mono-fallback"
+LAPTOP_MIC="alsa_input.pci-0000_07_00.6.HiFi__Mic1__source"
+C920_CAM="v4l2_input.pci-0000_07_00.4-usb-0_1.4.4_1.0"
+LAPTOP_CAM="v4l2_input.pci-0000_07_00.4-usb-0_3.2_1.0"
+
+# wpctl works on numeric ids; node names are what stays stable across replugs.
+id_of() {
+    wpctl status --name 2>/dev/null | grep -F "$1" | grep -oE '^[^0-9]*([0-9]+)\.' | grep -oE '[0-9]+' | head -1
+}
+
+# The external display's sink is whichever HDMI pin actually has a monitor,
+# which changes between the TV, the desk monitor and any dock.
+set_default_id() {
+    local kind="$1" id="$2"
+    if [ -z "$id" ]; then
+        echo "  $kind: no external display detected, skipped"
+        return
+    fi
+    wpctl set-default "$id" 2>/dev/null && echo "  $kind: $(wpctl inspect "$id" | grep -m1 node.description | sed 's/.*= //')"
+}
+
+set_default() {
+    local kind="$1" name="$2" id
+    id=$(id_of "$name")
+    if [ -z "$id" ]; then
+        echo "  $kind: not connected, skipped"
+        return
+    fi
+    wpctl set-default "$id" 2>/dev/null && echo "  $kind: $name"
+}
+
+case "${1:-status}" in
+room)
+    echo "switching to the room rig:"
+    set_default_id "speakers" "$(av-detect sink)"
+    set_default "mic     " "$ROOM_MIC"
+    set_default "camera  " "$C920_CAM"
+    ;;
+laptop)
+    echo "switching back to the laptop:"
+    set_default "speakers" "$LAPTOP_SINK"
+    set_default "mic     " "$LAPTOP_MIC"
+    set_default "camera  " "$LAPTOP_CAM"
+    ;;
+status)
+    wpctl status | sed -n '/Audio/,/^Video/p' | grep -E '^\s*[│├└ ]*\*' | sed 's/^[^*]*\* */default: /'
+    wpctl status | sed -n '/^Video/,$p' | grep -E '^\s*[│├└ ]*\*' | sed 's/^[^*]*\* */default: /'
+    ;;
+list)
+    wpctl status | sed -n '/Audio/,$p' | grep -E "Sinks:|Sources:|Devices:|[0-9]+\." | head -40
+    ;;
+*)
+    sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'
+    exit 1
+    ;;
+esac

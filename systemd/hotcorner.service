@@ -1,0 +1,12 @@
+[Unit]
+Description=Top-right hot corner (keybind cheatsheet)
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+ExecStart=/usr/bin/qs -c hotcorner
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical-session.target

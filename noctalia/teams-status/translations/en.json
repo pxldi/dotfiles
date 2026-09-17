@@ -1,0 +1,20 @@
+{
+  "settings": {
+    "poll_seconds": {
+      "label": "Check interval",
+      "description": "Seconds between unread-count checks."
+    },
+    "hide_when_empty": {
+      "label": "Hide when nothing is waiting",
+      "description": "Remove the widget from the bar when there are no unread items."
+    },
+    "show_count": {
+      "label": "Show the number",
+      "description": "Show the unread count next to the icon, not just a coloured glyph."
+    }
+  },
+  "unread": "%{count} unread in Teams",
+  "clear": "Nothing waiting in Teams",
+  "closed": "Teams is not running",
+  "hint": "Click to open Teams"
+}
