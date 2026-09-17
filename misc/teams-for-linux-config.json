@@ -1,6 +1,6 @@
 {
   "disableNotificationSound": true,
-  "disableNotifications": true,
+  "disableNotifications": false,
   "graphApi": {
     "enabled": true
   },
