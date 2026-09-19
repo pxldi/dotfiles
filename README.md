@@ -9,8 +9,8 @@ without the tenant's blessing.
 
 | Path | What it is |
 | --- | --- |
-| `niri/` | Compositor config: outputs, keybinds, input, window rules |
-| `noctalia/` | Bar layout and settings, plus three local plugins |
+| `niri/` | Compositor config: outputs, keybinds, input, window rules, startup layout script |
+| `noctalia/` | Bar layout and settings, plus five local plugins |
 | `bin/` | The scripts the bar and keybinds call |
 | `systemd/` | User units that keep the above fed |
 | `wireplumber/` | Audio device priority rules |
@@ -49,6 +49,8 @@ showing old data as if it were current.
 | `next-meeting` | Countdown to the next meeting; click joins it inside the join window, otherwise opens an agenda panel. Notifies a couple of minutes ahead. |
 | `media-controls` | Previous / play-pause / next in the bar. The play-pause glyph follows real MPRIS state, fed by `mpris-follow` so nothing is polled. |
 | `teams-status` | Teams unread count, read from the tray item's *tooltip* - its icon shows an attention dot with nothing waiting. |
+| `posture` | Sit/stand timer in the bar: alternates on a schedule, one nudge per switch, defers while a meeting is running, tracks today's standing time. |
+| `present` | Presentation state: shows whether an external screen is attached and whether you are live. Click presents, right-click mirrors (drives `bin/present`). |
 
 ## Scripts
 

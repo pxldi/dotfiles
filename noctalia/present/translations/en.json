@@ -1,0 +1,58 @@
+{
+  "settings": {
+    "poll_seconds": {
+      "label": "Poll interval",
+      "description": "Seconds between checks for the presentation state and the attached screen."
+    },
+    "hide_without_display": {
+      "label": "Hide with no external screen",
+      "description": "Remove the widget from the bar when nothing is plugged in, instead of dimming it."
+    },
+    "show_output_name": {
+      "label": "Show the output name",
+      "description": "Print the external output (for example HDMI-A-1) next to the icon while idle."
+    },
+    "right_click_action": {
+      "label": "Right click runs",
+      "description": "Which present subcommand right click starts: mirror, desk, or on. Right clicking again while that mode is live stops it."
+    },
+    "notify": {
+      "label": "Notify on start and stop",
+      "description": "Send a notification when a presentation begins or ends, including ones started from a keybind."
+    }
+  },
+  "working": "…",
+  "state": {
+    "no_display": "No external screen",
+    "ready": "Ready",
+    "live": "Presenting",
+    "mirroring": "active"
+  },
+  "mode": {
+    "window": "window",
+    "desk": "workspace",
+    "mirror": "mirror"
+  },
+  "tooltip": {
+    "state": "State",
+    "display": "Screen",
+    "mode": "Mode",
+    "mirror": "Mirror",
+    "hint_idle": "Plug in a screen to present",
+    "hint_ready": "Left click: present window · Right click: mirror",
+    "hint_live": "Left click: stop · Right click: mirror"
+  },
+  "error": "present failed",
+  "error.timeout": "the present script did not answer",
+  "error.spawn": "could not run the present script",
+  "notify": {
+    "on": {
+      "title": "Presenting",
+      "body": "%{mode} on %{output}. Notifications are silenced."
+    },
+    "off": {
+      "title": "Presentation ended",
+      "body": "Back to the laptop screen."
+    }
+  }
+}

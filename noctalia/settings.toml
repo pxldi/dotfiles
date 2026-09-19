@@ -3,7 +3,7 @@ config_version = 14
 [bar.default]
 center = [ "clock" ]
 end = [ "group:quick", "teams", "tray", "notifications", "battery", "control-center" ]
-start = [ "group:nav", "next_meeting", "weather", "group:meta" ]
+start = [ "group:nav", "next_meeting", "sappler/posture:posture", "sappler/present:present", "weather", "group:meta" ]
 widget_spacing = 10
 
     [bar.default.monitor.laptop]
@@ -11,7 +11,7 @@ widget_spacing = 10
     end = [ "group:quick", "teams", "tray", "notifications", "battery", "control-center" ]
     margin_ends = 12
     match = "eDP-1"
-    start = [ "group:nav", "next_meeting" ]
+    start = [ "group:nav", "next_meeting", "sappler/posture:posture", "sappler/present:present" ]
 
     [[bar.default.capsule_group]]
     accordion = false
@@ -188,7 +188,9 @@ enabled = [
     "kenn/keybind-cheatsheet",
     "sappler/next-meeting",
     "sappler/media-controls",
-    "sappler/teams-status"
+    "sappler/teams-status",
+    "sappler/posture",
+    "sappler/present"
 ]
 
 [shell.screenshot]
@@ -200,6 +202,10 @@ builtin = "Noctalia"
 community_palette = "Oxocarbon"
 mode = "dark"
 wallpaper_scheme = "m3-content"
+
+    [theme.templates]
+    builtin_ids = [ "starship" ]
+    enable_builtin_templates = true
 
 [wallpaper.default]
 path = "/home/sappler/Pictures/wallhaven-3919wv.jpg"
@@ -248,7 +254,6 @@ type = "sappler/teams-status:teams"
 [widget.tray]
 drawer = true
 drawer_columns = 4
-hidden = [ "teams-for-linux_status_icon_1" ]
 hide_passive = true
 
 [widget.widget]

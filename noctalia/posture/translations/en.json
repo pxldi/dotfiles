@@ -1,0 +1,64 @@
+{
+  "settings": {
+    "sit_minutes": {
+      "label": "Sitting stretch",
+      "description": "Minutes seated before the widget asks you to stand."
+    },
+    "stand_minutes": {
+      "label": "Standing stretch",
+      "description": "Minutes standing before the widget asks you to sit. Shorter than the sitting stretch on purpose: a long static stand has its own cost."
+    },
+    "stand_goal_minutes": {
+      "label": "Daily standing goal",
+      "description": "Minutes of standing to aim for per day, shown as a running total in the tooltip. 0 hides the goal."
+    },
+    "notify": {
+      "label": "Notify on switch",
+      "description": "Send one notification each time the posture changes. The bar text updates either way."
+    },
+    "defer_during_meetings": {
+      "label": "Hold during meetings",
+      "description": "Delay a switch that falls inside a calendar event, so the nudge does not land mid-call. Needs the next-event helper; without it switches happen on time."
+    },
+    "max_defer_minutes": {
+      "label": "Maximum hold",
+      "description": "Give up holding after this long and switch anyway. 0 waits for the meeting to end however long it runs."
+    },
+    "warn_minutes": {
+      "label": "Warning window",
+      "description": "Minutes before a switch at which the widget turns urgent."
+    },
+    "away_resets_minutes": {
+      "label": "Away resets the phase",
+      "description": "A gap between ticks longer than this means suspend or a long absence, so the current phase restarts instead of firing for time not spent at the desk. 0 disables."
+    },
+    "show_remaining": {
+      "label": "Show remaining time",
+      "description": "Print the time left in the bar next to the icon. Turn off for an icon-only widget."
+    }
+  },
+  "sitting": "Sitting",
+  "standing": "Standing",
+  "paused": "paused",
+  "held": "held",
+  "now": "now",
+  "tooltip": {
+    "state": "Posture",
+    "switch_in": "Switch in",
+    "standing_today": "Standing today",
+    "paused": "Paused",
+    "held": "Held",
+    "held_reason": "waiting for the meeting to end",
+    "hint": "Left click: switch now · Right click: pause"
+  },
+  "notify": {
+    "stand": {
+      "title": "Time to stand",
+      "body": "Standing for the next %{minutes} min."
+    },
+    "sit": {
+      "title": "Time to sit",
+      "body": "Sitting for the next %{minutes} min."
+    }
+  }
+}

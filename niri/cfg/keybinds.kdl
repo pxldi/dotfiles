@@ -177,5 +177,6 @@ binds {
     // presentation preset lives on Ctrl+P instead.
     Mod+CTRL+P                          hotkey-overlay-title="Present: toggle window on external screen" { spawn "present" "toggle"; }
     Mod+CTRL+Shift+P                    hotkey-overlay-title="Present: stop and take the window back" { spawn "present" "off"; }
+    Mod+CTRL+M                          hotkey-overlay-title="Present: mirror the laptop screen" { spawn "present" "mirror"; }
     Mod+O                               repeat=false { toggle-overview; }
 }

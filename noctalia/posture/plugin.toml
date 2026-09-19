@@ -1,0 +1,82 @@
+id = "sappler/posture"
+name = "Posture"
+version = "1.0.0"
+plugin_api = 9
+author = "sappler"
+license = "MIT"
+icon = "armchair"
+description = "Alternates sitting and standing on a timer, with one nudge per switch and a running total of today's standing time."
+tags = ["bar", "health", "productivity"]
+
+[[widget]]
+id = "posture"
+entry = "widget.luau"
+
+  [[widget.setting]]
+  key = "sit_minutes"
+  type = "int"
+  label_key = "settings.sit_minutes.label"
+  description_key = "settings.sit_minutes.description"
+  default = 30
+  min = 5
+
+  [[widget.setting]]
+  key = "stand_minutes"
+  type = "int"
+  label_key = "settings.stand_minutes.label"
+  description_key = "settings.stand_minutes.description"
+  default = 20
+  min = 5
+
+  [[widget.setting]]
+  key = "stand_goal_minutes"
+  type = "int"
+  label_key = "settings.stand_goal_minutes.label"
+  description_key = "settings.stand_goal_minutes.description"
+  default = 120
+  min = 0
+
+  [[widget.setting]]
+  key = "notify"
+  type = "bool"
+  label_key = "settings.notify.label"
+  description_key = "settings.notify.description"
+  default = true
+
+  [[widget.setting]]
+  key = "defer_during_meetings"
+  type = "bool"
+  label_key = "settings.defer_during_meetings.label"
+  description_key = "settings.defer_during_meetings.description"
+  default = true
+
+  [[widget.setting]]
+  key = "max_defer_minutes"
+  type = "int"
+  label_key = "settings.max_defer_minutes.label"
+  description_key = "settings.max_defer_minutes.description"
+  default = 15
+  min = 0
+
+  [[widget.setting]]
+  key = "warn_minutes"
+  type = "int"
+  label_key = "settings.warn_minutes.label"
+  description_key = "settings.warn_minutes.description"
+  default = 2
+  min = 0
+
+  [[widget.setting]]
+  key = "away_resets_minutes"
+  type = "int"
+  label_key = "settings.away_resets_minutes.label"
+  description_key = "settings.away_resets_minutes.description"
+  default = 20
+  min = 0
+
+  [[widget.setting]]
+  key = "show_remaining"
+  type = "bool"
+  label_key = "settings.show_remaining.label"
+  description_key = "settings.show_remaining.description"
+  default = true

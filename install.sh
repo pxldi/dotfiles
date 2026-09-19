@@ -27,11 +27,12 @@ link() {
 echo "niri:"
 link "$REPO/niri/config.kdl" "$CONFIG/niri/config.kdl"
 link "$REPO/niri/cfg" "$CONFIG/niri/cfg"
+link "$REPO/niri/startup.fish" "$CONFIG/niri/startup.fish"
 
 echo "noctalia:"
 link "$REPO/noctalia/settings.toml" "$STATE/noctalia/settings.toml"
 link "$REPO/noctalia/shell-config.toml" "$CONFIG/noctalia/config.toml"
-for plugin in next-meeting media-controls teams-status; do
+for plugin in next-meeting media-controls teams-status posture present; do
     link "$REPO/noctalia/$plugin" "$SHARE/noctalia/plugins/$plugin"
 done
 

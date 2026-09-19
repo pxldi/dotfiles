@@ -1,0 +1,50 @@
+id = "sappler/present"
+name = "Present"
+version = "1.0.0"
+plugin_api = 9
+author = "sappler"
+license = "MIT"
+icon = "presentation"
+description = "Presentation mode in the bar: shows whether an external screen is attached and whether you are live, with click-to-present and click-to-mirror."
+dependencies = ["present"]
+tags = ["bar", "display", "productivity"]
+
+[[widget]]
+id = "present"
+entry = "widget.luau"
+
+  [[widget.setting]]
+  key = "poll_seconds"
+  type = "int"
+  label_key = "settings.poll_seconds.label"
+  description_key = "settings.poll_seconds.description"
+  default = 3
+  min = 1
+
+  [[widget.setting]]
+  key = "hide_without_display"
+  type = "bool"
+  label_key = "settings.hide_without_display.label"
+  description_key = "settings.hide_without_display.description"
+  default = false
+
+  [[widget.setting]]
+  key = "show_output_name"
+  type = "bool"
+  label_key = "settings.show_output_name.label"
+  description_key = "settings.show_output_name.description"
+  default = false
+
+  [[widget.setting]]
+  key = "right_click_action"
+  type = "string"
+  label_key = "settings.right_click_action.label"
+  description_key = "settings.right_click_action.description"
+  default = "mirror"
+
+  [[widget.setting]]
+  key = "notify"
+  type = "bool"
+  label_key = "settings.notify.label"
+  description_key = "settings.notify.description"
+  default = true
