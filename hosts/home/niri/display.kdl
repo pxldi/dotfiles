@@ -1,0 +1,16 @@
+// ────────────── Output Configuration ──────────────
+// Two identical 1440p panels on DisplayPort. `niri msg outputs` prints the
+// connector names if a cable ever moves.
+
+// Left panel, and the one every workspace opens on.
+output "DP-2" {
+    mode "2560x1440@143.973"
+    scale 1
+    position x=0 y=0
+}
+
+output "DP-3" {
+    mode "2560x1440@143.973"
+    scale 1
+    position x=2560 y=0
+}

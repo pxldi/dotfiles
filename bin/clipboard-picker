@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Pick an entry out of the cliphist history and put it back on the clipboard.
+#
+# cliphist stores each entry behind an id, and its list output is one line per
+# entry, so fuzzel can show it directly. `cliphist decode` turns the chosen
+# line back into the original bytes, images included.
+
+set -uo pipefail
+
+cliphist list \
+    | fuzzel --dmenu --prompt "clipboard: " --width 80 \
+    | cliphist decode \
+    | wl-copy

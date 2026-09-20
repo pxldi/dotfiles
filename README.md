@@ -1,20 +1,44 @@
 # dotfiles
 
-A niri + Noctalia desktop on Arch, with a Microsoft 365 calendar that works
-without the tenant's blessing.
+A niri + Noctalia desktop on Arch, on two machines, with a Microsoft 365
+calendar on the work one that works without the tenant's blessing.
 
-`./install.sh` symlinks everything into place and prints the services to enable.
+`./install.sh <profile>` symlinks everything into place and prints the services
+to enable. The profiles are `work` and `home`.
 
 ## What is here
 
 | Path | What it is |
 | --- | --- |
-| `niri/` | Compositor config: outputs, keybinds, input, window rules, startup layout script |
-| `noctalia/` | Bar layout and settings, plus five local plugins |
+| `niri/` | Compositor config: keybinds, input, layout, animation, window rules |
+| `noctalia/` | The five local plugins, and the shell config |
 | `bin/` | The scripts the bar and keybinds call |
 | `systemd/` | User units that keep the above fed |
 | `wireplumber/` | Audio device priority rules |
-| `misc/` | Portal, Teams, calendar-source and hot-corner config |
+| `misc/` | Portal, idle, Teams, calendar-source and hot-corner config |
+| `hosts/<profile>/` | Everything that differs between the two machines |
+
+## Profiles
+
+Four things cannot be shared between a laptop with a TV attached and a desktop
+with two identical panels: the outputs, which workspace opens on which output,
+what starts up, and what sits in the bar. Those live in
+`hosts/<profile>/`, and `install.sh` links them into the same destinations as
+the shared files, so `config.kdl` does not change between machines.
+
+`hosts/<profile>/manifest.sh` also decides which scripts, plugins and units get
+linked at all. That is what keeps the Teams machinery off the home desktop.
+
+| | `work` | `home` |
+| --- | --- | --- |
+| Outputs | eDP-1 laptop panel, DP-2 TV | DP-2 and DP-3, two 1440p panels |
+| Bar | next meeting, Teams unread, present, posture, media | posture, media |
+| Startup | browser, shells, VeraCrypt, Teams, music | browser, shells, music |
+| Teams and the M365 calendar | yes | no |
+| Presentation rig (`present`, `av`) | yes | no |
+
+`posture` is on both. On `home` its `defer_during_meetings` is off, because
+the meeting it would defer for is read by `next-event`, which is work-only.
 
 ## The calendar, and why it is built this way
 
@@ -63,6 +87,7 @@ showing old data as if it were current.
 | `mpris-follow` | Stream playback state to a file so the bar never polls |
 | `present` | Presentation mode: move to the external screen, fullscreen, hide the bar, DND, room audio |
 | `av` / `av-detect` | Switch the audio/video rig; detect which display and sink are attached |
+| `clipboard-picker` | Pick an entry out of the cliphist history (Mod+V) |
 
 ## Things worth knowing
 
@@ -78,9 +103,26 @@ showing old data as if it were current.
 
 ## Requirements
 
-    niri noctalia mosquitto teams-for-linux playerctl gnome-calendar
-    evolution-data-server wl-mirror grim slurp
+Both profiles:
+
+    niri noctalia quickshell xwayland-satellite ghostty fuzzel hypridle
+    cliphist wl-clipboard playerctl easyeffects polkit-gnome flameshot
+    nautilus grim slurp bibata-cursor-theme
+
+The portal set `misc/niri-portals.conf` names:
+
+    xdg-desktop-portal xdg-desktop-portal-gnome xdg-desktop-portal-gtk
+    xdg-desktop-portal-wlr gnome-keyring
+
+The `work` profile adds:
+
+    mosquitto teams-for-linux gnome-calendar evolution-data-server wl-mirror
+    veracrypt
 
 `mosquitto` needs a local listener - `listener 1883 localhost` and
 `allow_anonymous true` - and `teams-for-linux` needs `graphApi.enabled` plus
 MQTT with a `commandTopic` set, as in `misc/teams-for-linux-config.json`.
+
+The bar also loads five plugins that are not in this repo. Install them from
+Noctalia's plugin browser: `noctalia/wallhaven`, `felipeartur/ai-usagebar`,
+`yuuto/arch-updater`, `dotnetrob/cat`, `kenn/keybind-cheatsheet`.

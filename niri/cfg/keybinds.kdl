@@ -13,7 +13,7 @@ binds {
     Mod+CTRL+Return                     hotkey-overlay-title="Open Terminal + Claude" { spawn "ghostty" "-e" "fish" "-C" "claude"; }
     Mod+B                               hotkey-overlay-title="Open Browser: Helium" { spawn "helium-browser"; }
     Mod+D                               hotkey-overlay-title="App Launcher: fuzzel" { spawn "fuzzel"; }
-    Mod+V                               hotkey-overlay-title="Clipboard History" { spawn "/home/sappler/.local/bin/clipboard-picker.sh"; }
+    Mod+V                               hotkey-overlay-title="Clipboard History" { spawn-sh "$HOME/.local/bin/clipboard-picker"; }
     Print                                hotkey-overlay-title="Screenshot: region (noctalia)" { spawn-sh "noctalia msg screenshot-region"; }
     Mod+P                               hotkey-overlay-title="Screenshot: region (noctalia)" { spawn-sh "noctalia msg screenshot-region"; }
     Mod+Shift+Print                     hotkey-overlay-title="Screenshot: freeze and annotate" { spawn-sh "noctalia msg screenshot-annotate"; }
