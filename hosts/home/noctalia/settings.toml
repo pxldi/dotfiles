@@ -1,0 +1,181 @@
+config_version = 14
+
+[bar.default]
+center = [ "clock" ]
+end = [ "group:quick", "tray", "notifications", "control-center" ]
+start = [ "group:nav", "posture", "weather", "group:meta" ]
+widget_spacing = 10
+
+    [[bar.default.capsule_group]]
+    accordion = false
+    accordion_direction = "end"
+    enabled = true
+    fill = "surface_variant"
+    id = "nav"
+    members = [ "launcher", "workspaces" ]
+    opacity = 1.0
+    padding = 6.0
+
+    [[bar.default.capsule_group]]
+    accordion = false
+    accordion_direction = "end"
+    enabled = true
+    fill = "surface_variant"
+    id = "meta"
+    members = [ "bar", "widget", "cat" ]
+    opacity = 1.0
+    padding = 6.0
+
+    [[bar.default.capsule_group]]
+    accordion = false
+    accordion_direction = "end"
+    enabled = true
+    fill = "surface_variant"
+    id = "quick"
+    members = [ "privacy", "mc_prev", "mc_play", "mc_next", "media", "output_volume", "network", "bluetooth" ]
+    opacity = 1.0
+    padding = 6.0
+
+[calendar]
+enabled = true
+
+[location]
+auto_locate = true
+
+[lockscreen_widgets]
+enabled = false
+schema_version = 2
+widget_order = [ "lockscreen-login-box@DP-2", "lockscreen-login-box@DP-3" ]
+
+    [lockscreen_widgets.grid]
+    cell_size = 16
+    major_interval = 4
+    visible = true
+
+    [lockscreen_widgets.widget."lockscreen-login-box@DP-2"]
+    box_height = 196.0
+    box_width = 810.0
+    cx = 1280.0
+    cy = 1258.0
+    output = "DP-2"
+    placement_height = 1440.0
+    placement_width = 2560.0
+    rotation = 0.0
+    type = "login_box"
+
+        [lockscreen_widgets.widget."lockscreen-login-box@DP-2".settings]
+        background_color = "surface_variant"
+        background_opacity = 0.88
+        background_radius = 12.0
+        center_password_text = false
+        input_opacity = 1.0
+        input_radius = 6.0
+        layout = "regular"
+        show_caps_lock = true
+        show_keyboard_layout = true
+        show_login_button = true
+        show_media = true
+        show_session_buttons = true
+        show_unlock_hint = true
+        show_weather = true
+
+    [lockscreen_widgets.widget."lockscreen-login-box@DP-3"]
+    box_height = 196.0
+    box_width = 810.0
+    cx = 1280.0
+    cy = 1258.0
+    output = "DP-3"
+    placement_height = 1440.0
+    placement_width = 2560.0
+    rotation = 0.0
+    type = "login_box"
+
+        [lockscreen_widgets.widget."lockscreen-login-box@DP-3".settings]
+        background_color = "surface_variant"
+        background_opacity = 0.88
+        background_radius = 12.0
+        center_password_text = false
+        input_opacity = 1.0
+        input_radius = 6.0
+        layout = "regular"
+        show_caps_lock = true
+        show_keyboard_layout = true
+        show_login_button = true
+        show_media = true
+        show_session_buttons = true
+        show_unlock_hint = true
+        show_weather = true
+
+[plugin_settings."yuuto/arch-updater"]
+auto_check_hours = 1
+
+[plugins]
+enabled = [
+    "noctalia/wallhaven",
+    "felipeartur/ai-usagebar",
+    "yuuto/arch-updater",
+    "dotnetrob/cat",
+    "kenn/keybind-cheatsheet",
+    "sappler/media-controls",
+    "sappler/posture"
+]
+
+[shell.screenshot]
+copy_to_clipboard = true
+save_to_file = false
+
+[theme]
+builtin = "Noctalia"
+community_palette = "Oxocarbon"
+mode = "dark"
+wallpaper_scheme = "m3-content"
+
+    [theme.templates]
+    builtin_ids = [ "starship" ]
+    enable_builtin_templates = true
+
+[wallpaper.default]
+path = "/usr/share/noctalia/assets/noctalia-wallpaper.png"
+
+[wallpaper.last]
+path = "/usr/share/noctalia/assets/noctalia-wallpaper.png"
+
+[widget.bar]
+scale = 1.4000000000000001
+show_glyph = false
+show_name = true
+type = "felipeartur/ai-usagebar:bar"
+vendor = "anthropic"
+visualization = "gauge"
+
+[widget.cat]
+type = "dotnetrob/cat:cat"
+
+[widget.mc_next]
+type = "sappler/media-controls:next"
+
+[widget.mc_play]
+type = "sappler/media-controls:play_pause"
+
+[widget.mc_prev]
+type = "sappler/media-controls:previous"
+
+[widget.media]
+hide_when_no_media = true
+max_length = 180
+title_scroll = "on_hover"
+
+[widget.network]
+show_label = false
+
+[widget.posture]
+defer_during_meetings = false
+type = "sappler/posture:posture"
+
+[widget.tray]
+drawer = true
+drawer_columns = 4
+hide_passive = true
+
+[widget.widget]
+type = "yuuto/arch-updater:widget"

@@ -1,0 +1,31 @@
+// ────────────── Startup placement ──────────────
+// Ghostty windows are told apart by a per-slot --class (see startup.fish).
+
+    window-rule {
+        match app-id=r#"^com\.mitchellh\.ghostty\.w1"#
+        open-on-workspace "1"
+        default-column-width { proportion 0.33333; }
+    }
+
+    window-rule {
+        match app-id=r#"^com\.mitchellh\.ghostty\.w2"#
+        open-on-workspace "2"
+        default-column-width { proportion 0.5; }
+    }
+
+    window-rule {
+        match app-id=r#"^org\.gnome\.Nautilus$"#
+        open-on-workspace "2"
+        default-column-width { proportion 0.5; }
+    }
+
+    window-rule {
+        match app-id="^helium$"
+        open-on-workspace "1"
+        default-column-width { proportion 0.66667; }
+    }
+
+    window-rule {
+        match app-id="^feishin$"
+        open-on-workspace "3"
+    }

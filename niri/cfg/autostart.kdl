@@ -7,4 +7,5 @@
     spawn-at-startup "hypridle"
     spawn-at-startup "wl-paste" "--watch" "cliphist" "store"
 
-    spawn-at-startup "/home/sappler/.config/niri/startup.fish"
+    // sh expands $HOME; niri does not expand ~ in spawn-at-startup.
+    spawn-at-startup "sh" "-c" "$HOME/.config/niri/startup.fish"

@@ -1,0 +1,7 @@
+// ────────────── Named Workspaces ──────────────
+// Declaration order = position. Names "1".."3" keep Mod+1/2/3 working.
+// https://github.com/YaLTeR/niri/wiki/Configuration:-Layout#workspaces
+
+    workspace "1" { open-on-output "DP-2"; }
+    workspace "2" { open-on-output "DP-2"; }
+    workspace "3" { open-on-output "DP-3"; }
