@@ -110,10 +110,15 @@ mirror)
     require_tv
     command -v wl-mirror >/dev/null || { echo "wl-mirror is not installed"; exit 1; }
     pkill -x wl-mirror 2>/dev/null
-    wl-mirror -F -S "$LAPTOP" >/dev/null 2>&1 &
+    # wl-mirror places itself fullscreen on the TV, so nothing has to be moved
+    # afterwards. (-S is --stream, not "source": it reads options from stdin and
+    # dies on /dev/null, which used to fullscreen the focused window instead.)
+    # setsid so the mirror outlives whatever spawned us (keybind, bar widget).
+    setsid -f wl-mirror --fullscreen-output "$TV" "$LAPTOP" </dev/null >/dev/null 2>&1
     sleep 1
-    niri msg action move-window-to-monitor "$TV" 2>/dev/null
-    niri msg action fullscreen-window 2>/dev/null
+    pgrep -x wl-mirror >/dev/null || { echo "wl-mirror failed to start"; exit 1; }
+    # The mirror grabs focus on the TV; keep typing on the laptop screen.
+    niri msg action focus-monitor "$LAPTOP" 2>/dev/null
     bar hide
     caffeine enable
     dnd on
